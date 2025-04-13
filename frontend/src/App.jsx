@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
-const API_URL = "https://todo-fastapi-leka.onrender.com/";  
+// Update your API_URL to your deployed backend URL
+const API_URL = "https://todo-fastapi-leka.onrender.com/";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -21,7 +22,7 @@ function App() {
 
   useEffect(() => {
     axios
-      .get(API_URL)
+      .get(`${API_URL}tasks/`) // Ensure the correct endpoint is called here
       .then((response) => {
         setTasks(response.data);
         setLoading(false);
@@ -36,7 +37,7 @@ function App() {
   const addTask = () => {
     if (newTask.trim() === "") return;
     axios
-      .post(API_URL, { title: newTask, completed: false })
+      .post(`${API_URL}tasks/`, { title: newTask, completed: false })
       .then((response) => {
         setTasks([...tasks, response.data]);
         setNewTask("");
@@ -46,7 +47,7 @@ function App() {
 
   const deleteTask = (id) => {
     axios
-      .delete(`${API_URL}${id}/`)
+      .delete(`${API_URL}tasks/${id}/`)
       .then(() => {
         setTasks(tasks.filter((task) => task.id !== id));
       })
@@ -55,7 +56,7 @@ function App() {
 
   const toggleComplete = (id, completed) => {
     axios
-      .patch(`${API_URL}${id}/`, { completed: !completed })
+      .patch(`${API_URL}tasks/${id}/`, { completed: !completed })
       .then((response) => {
         setTasks(tasks.map((task) => (task.id === id ? response.data : task)));
       })
@@ -68,7 +69,7 @@ function App() {
       return;
     }
     axios
-      .patch(`${API_URL}${id}/`, { title: editingText })
+      .patch(`${API_URL}tasks/${id}/`, { title: editingText })
       .then((response) => {
         setTasks(tasks.map((task) => (task.id === id ? response.data : task)));
         setEditingId(null);
