@@ -1,0 +1,164 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+body.dark {
+  background-color: #222;
+  color: #fff;
+}
+
+.app {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  width: 350px;
+  text-align: center;
+}
+
+body.dark .app {
+  background: #333;
+  color: #fff;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+.input-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.input-container input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-container button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.2s;
+}
+
+.input-container button:hover {
+  background: #218838;
+}
+
+.filters-and-darkmode {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px; 
+  justify-content: center;
+}
+
+.filter-buttons button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.2s;
+  min-width: 80px; 
+  text-align: center;
+}
+
+.filter-buttons button.active {
+  background: #0056b3;
+}
+
+.filter-buttons button:hover {
+  background: #0056b3;
+}
+
+.dark-mode-toggle button {
+  background: #0056b3;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: 0.2s;
+}
+
+.dark-mode-toggle button:hover {
+  background: #555;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background: #f9f9f9;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+body.dark li {
+  background: #444;
+}
+
+.completed .task-text {
+  text-decoration: line-through;
+  color: #777;
+}
+
+.task-text {
+  flex: 1;
+  margin-left: 10px;
+}
+
+li button {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-left: 5px;
+  transition: 0.2s;
+}
+
+li button:hover {
+  background: #c82333;
+}
+
+li input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+li input[type="text"] {
+  flex: 1;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
