@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
-const API_BASE = "https://todo-fastapi-leka.onrender.com"; // or "http://localhost:8000" during development
+const API_BASE = "https://todo-fastapi-leka.onrender.com";
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -14,13 +14,11 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Update dark mode on load and when changed
   useEffect(() => {
     document.body.className = darkMode ? "dark" : "";
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
-  // Fetch tasks from the backend
   useEffect(() => {
     axios
       .get(`${API_BASE}/tasks`)
@@ -35,33 +33,30 @@ function App() {
       });
   }, []);
 
-  // Create a new task
+  // ✅ FIXED: addTask uses `/tasks/` with trailing slash
   const addTask = () => {
     if (newTask.trim() === "") {
       console.log("Task input is empty");
       return;
     }
-  
+
     axios
-      .post(`${API_BASE}/tasks`, { title: newTask, completed: false })
+      .post(`${API_BASE}/tasks/`, { title: newTask, completed: false })
       .then((response) => {
-        const addedTask = response.data;
-        if (addedTask && addedTask.id && addedTask.title) {
-          setTasks((prevTasks) => [...prevTasks, addedTask]); // safer with prev state
-          setNewTask(""); // clear input field
-          console.log("Task successfully added:", addedTask);
+        console.log("Task added:", response.data);
+        if (response.data && response.data.id && response.data.title) {
+          setTasks([...tasks, response.data]);
+          setNewTask("");
         } else {
-          console.error("Unexpected response structure:", addedTask);
+          console.error("Error: Task structure is invalid:", response.data);
         }
       })
       .catch((error) => {
-        console.error("Error adding task:", error.response || error);
-        alert("Failed to add task. Please check console for details.");
+        console.error("Error adding task:", error);
+        alert("Failed to add task. Check console for details.");
       });
   };
-  
 
-  // Delete a task by id
   const deleteTask = (id) => {
     axios
       .delete(`${API_BASE}/tasks/${id}`)
@@ -71,18 +66,15 @@ function App() {
       .catch((error) => console.error("Error deleting task:", error));
   };
 
-  // Toggle task completion
   const toggleComplete = (id, completed) => {
     axios
       .patch(`${API_BASE}/tasks/${id}`, { completed: !completed })
       .then((response) => {
-        console.log("Task toggled:", response.data); // Debug response
         setTasks(tasks.map((task) => (task.id === id ? response.data : task)));
       })
       .catch((error) => console.error("Error updating task:", error));
   };
 
-  // Save edited task title
   const saveEdit = (id) => {
     if (!editingText.trim()) {
       alert("Please enter a task title");
@@ -91,14 +83,12 @@ function App() {
     axios
       .patch(`${API_BASE}/tasks/${id}`, { title: editingText })
       .then((response) => {
-        console.log("Task updated:", response.data);  // Debug response
         setTasks(tasks.map((task) => (task.id === id ? response.data : task)));
         setEditingId(null);
       })
       .catch((error) => console.error("Error updating task:", error));
   };
 
-  // Filter tasks based on completion status
   const filteredTasks = tasks.filter((task) => {
     if (filter === "completed") return task.completed;
     if (filter === "pending") return !task.completed;
