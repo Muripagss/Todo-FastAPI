@@ -36,30 +36,30 @@ function App() {
   }, []);
 
   // Create a new task
-  // Create a new task
-const addTask = () => {
-  if (newTask.trim() === "") {
-    console.log("Task input is empty");
-    return; // Don't proceed if input is empty
-  }
-
-  axios
-    .post(`${API_BASE}/tasks`, { title: newTask, completed: false })
-    .then((response) => {
-      console.log("Task added:", response.data);  // Debug response
-      // Check if response.data contains the expected task structure
-      if (response.data && response.data.id && response.data.title) {
-        setTasks([...tasks, response.data]);
-        setNewTask(""); // Clear input after successful add
-      } else {
-        console.error("Error: Task structure is invalid:", response.data);
-      }
-    })
-    .catch((error) => {
-      console.error("Error adding task:", error);
-      alert("Failed to add task. Check console for details.");
-    });
-};
+  const addTask = () => {
+    if (newTask.trim() === "") {
+      console.log("Task input is empty");
+      return;
+    }
+  
+    axios
+      .post(`${API_BASE}/tasks`, { title: newTask, completed: false })
+      .then((response) => {
+        const addedTask = response.data;
+        if (addedTask && addedTask.id && addedTask.title) {
+          setTasks((prevTasks) => [...prevTasks, addedTask]); // safer with prev state
+          setNewTask(""); // clear input field
+          console.log("Task successfully added:", addedTask);
+        } else {
+          console.error("Unexpected response structure:", addedTask);
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding task:", error.response || error);
+        alert("Failed to add task. Please check console for details.");
+      });
+  };
+  
 
   // Delete a task by id
   const deleteTask = (id) => {
