@@ -3,7 +3,7 @@ import axios from "axios";
 import "./App.css";
 
 // ✅ Replace with your backend API base URL
-const API_BASE = "https://todo-fastapi-leka.onrender.com";
+const API_BASE = "https://todo-fastapi-leka.onrender.com"; // or "http://localhost:8000" during development
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -15,11 +15,13 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Update dark mode on load and when changed
   useEffect(() => {
     document.body.className = darkMode ? "dark" : "";
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
+  // Fetch tasks from the backend
   useEffect(() => {
     axios
       .get(`${API_BASE}/tasks`)
@@ -34,17 +36,20 @@ function App() {
       });
   }, []);
 
+  // Create a new task
   const addTask = () => {
     if (newTask.trim() === "") return;
     axios
-      .post(`${API_BASE}/tasks/`, { title: newTask, completed: false })
+      .post(`${API_BASE}/tasks`, { title: newTask, completed: false })
       .then((response) => {
+        // Make sure response.data contains the created task with a proper id (without any colon)
         setTasks([...tasks, response.data]);
         setNewTask("");
       })
       .catch((error) => console.error("Error adding task:", error));
   };
 
+  // Delete a task by id
   const deleteTask = (id) => {
     axios
       .delete(`${API_BASE}/tasks/${id}`)
@@ -54,6 +59,7 @@ function App() {
       .catch((error) => console.error("Error deleting task:", error));
   };
 
+  // Toggle task completion
   const toggleComplete = (id, completed) => {
     axios
       .patch(`${API_BASE}/tasks/${id}`, { completed: !completed })
@@ -63,6 +69,7 @@ function App() {
       .catch((error) => console.error("Error updating task:", error));
   };
 
+  // Save edited task title
   const saveEdit = (id) => {
     if (!editingText.trim()) {
       alert("Please enter a task title");
@@ -77,6 +84,7 @@ function App() {
       .catch((error) => console.error("Error updating task:", error));
   };
 
+  // Filter tasks based on completion status
   const filteredTasks = tasks.filter((task) => {
     if (filter === "completed") return task.completed;
     if (filter === "pending") return !task.completed;

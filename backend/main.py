@@ -1,68 +1,66 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 
 app = FastAPI()
 
-# Allow your frontend to talk to the backend
+# CORS configuration: allow requests from your GitHub Pages domain
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Use specific origin in production
+    allow_origins=["https://muripagss.github.io"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# In-memory list to store tasks
-tasks = []
-task_id_counter = 1
+# In-memory storage for tasks and a counter for generating IDs
+tasks: List["Task"] = []
+next_id = 1
 
-# Task model
+# Model for a Task (used for responses and updates)
 class Task(BaseModel):
     id: int
     title: str
     completed: bool
 
+# Model for creating a new task (client doesn't provide the id)
 class TaskCreate(BaseModel):
     title: str
-    completed: Optional[bool] = False
+    completed: bool
 
-class TaskUpdate(BaseModel):
-    title: Optional[str] = None
-    completed: Optional[bool] = None
-
-
-@app.get("/tasks/", response_model=List[Task])
+# Endpoint to get all tasks
+@app.get("/tasks", response_model=List[Task])
 def get_tasks():
     return tasks
 
-
-@app.post("/tasks/", response_model=Task)
+# Endpoint to create a new task
+@app.post("/tasks", response_model=Task)
 def create_task(task: TaskCreate):
-    global task_id_counter
-    new_task = Task(id=task_id_counter, title=task.title, completed=task.completed)
+    global next_id
+    new_task = Task(id=next_id, title=task.title, completed=task.completed)
+    next_id += 1
     tasks.append(new_task)
-    task_id_counter += 1
     return new_task
 
-
-@app.patch("/tasks/{task_id}/", response_model=Task)
-def update_task(task_id: int, task_update: TaskUpdate):
-    for task in tasks:
-        if task.id == task_id:
-            if task_update.title is not None:
-                task.title = task_update.title
-            if task_update.completed is not None:
-                task.completed = task_update.completed
-            return task
+# Endpoint to update an existing task
+@app.patch("/tasks/{task_id}", response_model=Task)
+def update_task(task_id: int, task: Task):
+    for index, existing_task in enumerate(tasks):
+        if existing_task.id == task_id:
+            # Update the fields of the existing task based on the input
+            updated_task = Task(
+                id=existing_task.id,
+                title=task.title or existing_task.title,
+                completed=task.completed if task.completed is not None else existing_task.completed,
+            )
+            tasks[index] = updated_task
+            return updated_task
     raise HTTPException(status_code=404, detail="Task not found")
 
-
-@app.delete("/tasks/{task_id}/")
+# Endpoint to delete a task
+@app.delete("/tasks/{task_id}")
 def delete_task(task_id: int):
-    for task in tasks:
-        if task.id == task_id:
-            tasks.remove(task)
-            return {"detail": "Task deleted"}
-    raise HTTPException(status_code=404, detail="Task not found")
+    global tasks
+    tasks = [task for task in tasks if task.id != task_id]
+    return {"message": "Task deleted successfully"}
