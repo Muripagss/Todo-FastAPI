@@ -33,6 +33,11 @@ h1 {
   margin-bottom: 10px;
 }
 
+input[type="text"] {
+  background-color: white;
+  color: black;
+}
+
 .input-container {
   display: flex;
   gap: 10px;
