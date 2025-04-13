@@ -1,69 +1,68 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from backend import models, schemas, crud
-from backend.database import SessionLocal, engine
-
-# Create database tables
-models.Base.metadata.create_all(bind=engine)
+from pydantic import BaseModel
+from typing import List, Optional
 
 app = FastAPI()
 
-# ✅ Add your deployed frontend URL here
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://muripagss.github.io"  # <-- GitHub Pages URL
-]
-
+# Allow your frontend to talk to the backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],       # <- include your deployed frontend
+    allow_origins=["*"],  # Use specific origin in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Dependency to get DB
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# In-memory list to store tasks
+tasks = []
+task_id_counter = 1
 
-# Routes
-@app.get("/", response_model=list[schemas.ToDoRead])
-def read_all(db: Session = Depends(get_db)):
-    return crud.get_all_tasks(db)
+# Task model
+class Task(BaseModel):
+    id: int
+    title: str
+    completed: bool
 
-@app.get("/{task_id}", response_model=schemas.ToDoRead)
-def read_task(task_id: int, db: Session = Depends(get_db)):
-    task = crud.get_task(db, task_id)
-    if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return task
+class TaskCreate(BaseModel):
+    title: str
+    completed: Optional[bool] = False
 
-@app.post("/", response_model=schemas.ToDoRead)
-def create(todo: schemas.ToDoCreate, db: Session = Depends(get_db)):
-    return crud.create_task(db, todo)
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    completed: Optional[bool] = None
 
-@app.patch("/{task_id}/", response_model=schemas.ToDoRead)
-def update(task_id: int, todo: schemas.ToDoUpdate, db: Session = Depends(get_db)):
-    task = crud.update_task(db, task_id, todo)
-    if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return task
 
-@app.delete("/{task_id}/")
-def delete(task_id: int, db: Session = Depends(get_db)):
-    task = crud.delete_task(db, task_id)
-    if task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return {"message": "Task deleted"}
+@app.get("/tasks/", response_model=List[Task])
+def get_tasks():
+    return tasks
 
-@app.get("/filter/{status}", response_model=list[schemas.ToDoRead])
-def filter_by_status(status: str, db: Session = Depends(get_db)):
-    if status not in ["completed", "pending"]:
-        raise HTTPException(status_code=400, detail="Invalid status")
-    return crud.filter_tasks(db, completed=(status == "completed"))
+
+@app.post("/tasks/", response_model=Task)
+def create_task(task: TaskCreate):
+    global task_id_counter
+    new_task = Task(id=task_id_counter, title=task.title, completed=task.completed)
+    tasks.append(new_task)
+    task_id_counter += 1
+    return new_task
+
+
+@app.patch("/tasks/{task_id}/", response_model=Task)
+def update_task(task_id: int, task_update: TaskUpdate):
+    for task in tasks:
+        if task.id == task_id:
+            if task_update.title is not None:
+                task.title = task_update.title
+            if task_update.completed is not None:
+                task.completed = task_update.completed
+            return task
+    raise HTTPException(status_code=404, detail="Task not found")
+
+
+@app.delete("/tasks/{task_id}/")
+def delete_task(task_id: int):
+    for task in tasks:
+        if task.id == task_id:
+            tasks.remove(task)
+            return {"detail": "Task deleted"}
+    raise HTTPException(status_code=404, detail="Task not found")
