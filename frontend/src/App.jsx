@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
-// ✅ Replace with your backend API base URL
 const API_BASE = "https://todo-fastapi-leka.onrender.com"; // or "http://localhost:8000" during development
 
 function App() {
@@ -42,7 +41,7 @@ function App() {
     axios
       .post(`${API_BASE}/tasks`, { title: newTask, completed: false })
       .then((response) => {
-        // Make sure response.data contains the created task with a proper id (without any colon)
+        console.log("Task added:", response.data);  // Debug response
         setTasks([...tasks, response.data]);
         setNewTask("");
       })
@@ -64,6 +63,7 @@ function App() {
     axios
       .patch(`${API_BASE}/tasks/${id}`, { completed: !completed })
       .then((response) => {
+        console.log("Task toggled:", response.data); // Debug response
         setTasks(tasks.map((task) => (task.id === id ? response.data : task)));
       })
       .catch((error) => console.error("Error updating task:", error));
@@ -78,6 +78,7 @@ function App() {
     axios
       .patch(`${API_BASE}/tasks/${id}`, { title: editingText })
       .then((response) => {
+        console.log("Task updated:", response.data);  // Debug response
         setTasks(tasks.map((task) => (task.id === id ? response.data : task)));
         setEditingId(null);
       })
