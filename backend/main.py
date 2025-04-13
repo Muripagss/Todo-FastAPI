@@ -1,24 +1,24 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from . import models, schemas, crud
-from .database import SessionLocal, engine
+from backend import models, schemas, crud
+from backend.database import SessionLocal, engine
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# Allow frontend to talk to backend
+# ✅ Add your deployed frontend URL here
 origins = [
     "http://localhost:5173",
-    "http://127.0.0.1:5173"
+    "http://127.0.0.1:5173",
+    "https://muripagss.github.io"  # <-- GitHub Pages URL
 ]
-
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,       # <- include your deployed frontend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
-const API_URL = "http://localhost:8000/";  // Matching the root route in FastAPI
-
+const API_URL = "https://todo-fastapi-leka.onrender.com/";  
 
 function App() {
   const [tasks, setTasks] = useState([]);
